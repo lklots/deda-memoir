@@ -16,7 +16,7 @@ for pdf_file in "$PDF_DIR"/*.pdf; do
 
     # Construct the command to process the PDF file
     output_format="page_%03d.png"
-    command="python pdf_to_images.py --start-page-num=$start_page_num --output-format=\"$output_format\" \"$pdf_file\" \"$IMG_DIR/\""
+    command="python slice.py --start-page-num=$start_page_num --output-format=\"$output_format\" \"$pdf_file\" \"$IMG_DIR/\""
 
     # Execute the command
     echo "Processing: $pdf_file with start page $start_page_num"
