@@ -44,8 +44,8 @@ def extract_text_from_image(image_path):
         if response.error.message:
             raise Exception(f"Error during text detection: {response.error.message}")
 
-        # Return extracted text
-        return response.full_text_annotation.text
+        # Return full JSON object
+        return response
 
     except Exception as e:
         print(f"An error occurred: {e}")

@@ -1,6 +1,6 @@
 # Define directories
 PDF_DIR="pdfs"
-IMG_DIR="imgs"
+IMG_DIR="slices"
 
 # Initialize starting page number
 start_page_num=1
