@@ -3,6 +3,7 @@ import io
 import argparse
 from google.cloud import vision
 from google.auth.exceptions import DefaultCredentialsError
+import json
 
 # Load environment variables
 GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
@@ -25,7 +26,7 @@ def extract_text_from_image(image_path):
         image_path (str): Path to the image file.
 
     Returns:
-        str: Extracted text from the image.
+        str: Extracted text from the image in JSON format without Unicode escape sequences.
     """
     # Check if the image file exists
     if not os.path.exists(image_path):
@@ -44,8 +45,11 @@ def extract_text_from_image(image_path):
         if response.error.message:
             raise Exception(f"Error during text detection: {response.error.message}")
 
-        # Return full JSON object
-        return response
+        # Convert response to JSON string and ensure characters are not escaped
+        response_json = json.loads(vision.AnnotateImageResponse.to_json(response))
+        response_json_string = json.dumps(response_json, ensure_ascii=False)
+
+        return response_json_string
 
     except Exception as e:
         print(f"An error occurred: {e}")
@@ -58,11 +62,10 @@ def main():
     args = parser.parse_args()
 
     # Extract text from the specified image
-    extracted_text = extract_text_from_image(args.image_path)
+    extracted_text_json = extract_text_from_image(args.image_path)
 
-    if extracted_text:
-        print("Extracted Text:")
-        print(extracted_text)
+    if extracted_text_json:
+        print(extracted_text_json)
     else:
         print("No text extracted or an error occurred.")
 
