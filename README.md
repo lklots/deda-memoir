@@ -11,7 +11,14 @@ This project automates the process of transcribing Deda's handwritten memoirs fr
 
 - Python 3.x
 - Google Cloud account with Vision API enabled
-- `GOOGLE_APPLICATION_CREDENTIALS` environment variable set
+- `GOOGLE_APPLICATION_CREDENTIALS` environment variable set to the path of your Google Cloud service account key JSON file. To obtain this key:
+  1. Create a service account in the Google Cloud Console
+  2. Generate a JSON key for the service account
+  3. Download the JSON key file
+  4. Set the environment variable to the path of the downloaded file
+
+  For detailed instructions, refer to the Google Cloud documentation:
+  https://cloud.google.com/docs/authentication/getting-started
 
 ## Setup
 
@@ -21,8 +28,9 @@ This project automates the process of transcribing Deda's handwritten memoirs fr
    python -m venv venv
    ```
 3. Activate the virtual environment:
-
-  `source venv/bin/activate`
+  ```
+  source venv/bin/activate
+  ```
 
 4. Install dependencies:
    ```
