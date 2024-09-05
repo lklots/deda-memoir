@@ -25,29 +25,25 @@ if [ -z "$(ls -A $INPUT_DIR/page_*.json 2>/dev/null)" ]; then
     exit 1
 fi
 
-# Loop through each JSON file in the input directory
-for input_file in "$INPUT_DIR"/page_*.json; do
-    # Check if the input file exists
-    if [ ! -f "$input_file" ]; then
-        echo "Warning: Input file '$input_file' does not exist or is not a file. Skipping."
-        continue
-    fi
+# Export the necessary variables for parallel execution
+export INPUT_DIR OUTPUT_DIR
 
-    # Extract the file number from the input filename using sed
+# Function to process a single JSON file
+process_file() {
+    input_file=$1
     file_number=$(basename "$input_file" .json | sed 's/page_//')
-
-    # Set the output filename using the extracted file number
     output_file="$OUTPUT_DIR/page_digest_${file_number}.json"
-
-    # Run the Python script and redirect output to the new file
     python3 digest.py "$input_file" > "$output_file"
-
-    # Check if the Python script executed successfully
     if [ $? -ne 0 ]; then
         echo "Error: Failed to process '$input_file' with digest.py."
         rm -f "$output_file" # Clean up incomplete output file
-        continue
+    else
+        echo "Digested $input_file -> $output_file"
     fi
+}
 
-    echo "Digested $input_file -> $output_file"
-done
+# Export the function for parallel execution
+export -f process_file
+
+# Find all JSON files and process them in parallel
+find "$INPUT_DIR" -name 'page_*.json' -print0 | xargs -0 -n 1 -P 4 bash -c 'process_file "$0"'
