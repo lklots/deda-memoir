@@ -88,10 +88,10 @@ def get_color_for_confidence(confidence):
         return {'red': 0.7, 'green': 0.0, 'blue': 0.0}  # Dark Red
 
 def main():
-    parser = argparse.ArgumentParser(description="Generate a Google Doc with digests and images.")
+    parser = argparse.ArgumentParser(description="Populate a Google Doc with digests and images for manual review.")
+    parser.add_argument('doc_id', help='ID of google doc to populate')
     parser.add_argument('--input_dir', default='digests', help='Directory containing digest JSON files')
     parser.add_argument('--image_dir', default='slices', help='Directory containing corresponding images')
-    parser.add_argument('--doc_title', default='Combined Digests Report', help='Title of the Google Doc to be created')
 
     args = parser.parse_args()
 
@@ -102,7 +102,13 @@ def main():
     if not GOOGLE_APPLICATION_CREDENTIALS:
         raise EnvironmentError("The GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.")
 
-    doc_id = "1ELuojkWBuQTPtfbSYvQn6LhDBTTY1RRk8RdNkj6eJ14" #harcoded
+    doc_id = args.doc_id
+    # Verify that doc_id points to a valid document
+    try:
+        doc_service, _ = authenticate_google()
+        doc_service.documents().get(documentId=doc_id).execute()
+    except Exception as e:
+        raise ValueError(f"The provided doc_id '{doc_id}' is not valid or accessible. Error: {e}")
 
     # Process each digest and corresponding image
     for digest_file in sorted(os.listdir(args.input_dir), reverse=True):
