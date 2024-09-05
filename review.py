@@ -27,9 +27,8 @@ def upload_image_to_drive(image_path):
 
     return file.get('id')
 
-def add_image_and_text_to_doc(doc_id, image_id, text_entries):
+def add_image_and_text_to_doc(doc_id, image_id, text):
     """Add a table with an image on the left and combined text on the right to the Google Doc."""
-    text = "\n".join([entry['text'] for entry in text_entries])
     doc_service, _ = authenticate_google()
 
     requests = [
@@ -87,11 +86,44 @@ def get_color_for_confidence(confidence):
     else:
         return {'red': 0.7, 'green': 0.0, 'blue': 0.0}  # Dark Red
 
+def digest_to_text(word_objects):
+    """
+    Converts the processed word objects into a single piece of text.
+    Line breaks should be represented as newlines, and words should be separated by spaces.
+
+    Args:
+        word_objects: List of word objects with 'word', 'confidence', and 'detected_break'.
+
+    Returns:
+        A single string with proper spaces and line breaks.
+    """
+    text_lines = []
+    current_line = []
+
+    for word_obj in word_objects:
+        word = word_obj['word']
+        detected_break = word_obj['detected_break']
+
+        # Add the word to the current line
+        current_line.append(word)
+
+        # If the detected break is a newline (3 or 5), flush the current line
+        if detected_break in [3, 5]:
+            text_lines.append(' '.join(current_line))
+            current_line = []  # Start a new line
+
+    # Add any remaining words that didn't trigger a newline
+    if current_line:
+        text_lines.append(' '.join(current_line))
+
+    # Join all the lines with newlines and return the final text
+    return '\n'.join(text_lines)
+
 def main():
     parser = argparse.ArgumentParser(description="Populate a Google Doc with digests and images for manual review.")
     parser.add_argument('doc_id', help='ID of google doc to populate')
-    parser.add_argument('--input_dir', default='digests', help='Directory containing digest JSON files')
-    parser.add_argument('--image_dir', default='slices', help='Directory containing corresponding images')
+    parser.add_argument('image_file', help='Path to the image file')
+    parser.add_argument('digest_file', help='Path to the digest JSON file')
 
     args = parser.parse_args()
 
@@ -103,6 +135,9 @@ def main():
         raise EnvironmentError("The GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.")
 
     doc_id = args.doc_id
+    image_path = args.image_file
+    digest_path = args.digest_file
+
     # Verify that doc_id points to a valid document
     try:
         doc_service, _ = authenticate_google()
@@ -110,29 +145,23 @@ def main():
     except Exception as e:
         raise ValueError(f"The provided doc_id '{doc_id}' is not valid or accessible. Error: {e}")
 
-    # Process each digest and corresponding image
-    for digest_file in sorted(os.listdir(args.input_dir), reverse=True):
-        if digest_file.endswith('.json'):
-            digest_path = os.path.join(args.input_dir, digest_file)
-            image_file = digest_file.replace('page_digest_', 'page_').replace('.json', '.png')
-            image_path = os.path.join(args.image_dir, image_file)
+    # Check if both digest and image files exist
+    if not os.path.exists(digest_path) or not os.path.exists(image_path):
+        print(f"Error: Both digest file '{digest_path}' and image file '{image_path}' must exist. Exiting.")
+        exit(1)
 
-            # Check if both digest and image files exist
-            if not os.path.exists(digest_path) or not os.path.exists(image_path):
-                print(f"Error: Both digest file '{digest_path}' and image file '{image_path}' must exist. Exiting.")
-                exit(1)
+    # Load digest content
+    with open(digest_path, 'r', encoding='utf-8') as f:
+        digest_data = json.load(f)
 
-            # Load digest content
-            with open(digest_path, 'r', encoding='utf-8') as f:
-                digest_data = json.load(f)
+    # Upload image to Google Drive
+    image_id = upload_image_to_drive(image_path)
 
-            # Upload image to Google Drive
-            image_id = upload_image_to_drive(image_path)
+    # Add the image and all text entries to the Google Doc as a single page
+    digest_text = digest_to_text(digest_data)
+    add_image_and_text_to_doc(doc_id, image_id, digest_text)
 
-            # Add the image and all text entries to the Google Doc as a single page
-            add_image_and_text_to_doc(doc_id, image_id, digest_data)
-
-            print(f'Processed digest {digest_file} with image {image_file}')
+    print(f'Processed digest {digest_path} with image {image_path}')
 
 if __name__ == '__main__':
     main()
