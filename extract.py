@@ -4,6 +4,9 @@ import argparse
 from google.cloud import vision
 from google.auth.exceptions import DefaultCredentialsError
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 # Load environment variables
 GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
