@@ -5,12 +5,11 @@ from docx import Document
 from docx.shared import Inches, Pt
 from dotenv import load_dotenv
 from datetime import datetime
-from docx.oxml.ns import nsdecls
-from docx.oxml import OxmlElement
 
 def append_review_to_docx(docx_file, image_path, digest, revision_text, revision_edits, metadata):
     """Add a table with an image on the left and combined text on the right to the .docx file."""
-    doc = Document(docx_file) if os.path.exists(docx_file) else Document()    # Add a table with 1 row and 3 columns
+    doc = Document(docx_file) if os.path.exists(docx_file) else Document()
+
     table = doc.add_table(rows=1, cols=3)
 
     # Set the table to take the whole page width
@@ -21,6 +20,15 @@ def append_review_to_docx(docx_file, image_path, digest, revision_text, revision
         cell.width = table_width / 3
     for cell in table.columns[2].cells:
         cell.width = table_width / 3
+
+    # Set the table to take the whole page length
+    section = doc.sections[0]
+    page_height = section.page_height - section.top_margin - section.bottom_margin
+    table.height = int(page_height)  # Convert to integer
+
+    # Distribute the height evenly among all rows
+    for row in table.rows:
+        row.height = int(page_height / len(table.rows))  # Convert to integer
 
     # First row, first cell: Add the image and metadata + revision edits
     cell1 = table.cell(0, 0)
