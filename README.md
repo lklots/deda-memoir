@@ -124,7 +124,7 @@ The project consists of several shell scripts that should be run in order. Here'
    - Usage: `./04_revise.sh`
 
 5. **05_review.sh**:
-   - Description: populates a google doc with all the information necessary to make a manual review.
+   - Description: populates a doc with all the information necessary to make a manual review.
    - Outputs: Final transcribed and reviewed memoir file in the output directory.
    - Usage: `./05_review.sh`
 
