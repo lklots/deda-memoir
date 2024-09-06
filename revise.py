@@ -39,17 +39,11 @@ def refine_text_with_openai(text):
     """Sends the assembled text to OpenAI API for refinement."""
 
     prompt = f"""
-      Persona: Expert editor with a focus on maintaining accuracy in transcriptions.
-
-      Task: You are given a transcription of one page of Russian text that was extracted from an image.
-      The transcription may contain errors and issues with formatting. Your task is to:
-
-      Fixed punctuation issues
-      Corrected word splits
-      Any misspellings
-      Fixed formatting issues like line breaks and spacing for better readability.
-      Added proper formatting for page references and quotes
-      Any other edits that would be necessary should be noted in the edits section but not performed.
+      i am transcribing a russian book.
+      i need you to take this ocred text and tell which errors exist.
+      then re-write the text as necessary.
+      finally, provide basic formatting for things like quotes and others to make it easier to convert to a book.
+      try to keep the text as close to the original as possible. keep page references.
 
       {text}
 
@@ -58,12 +52,12 @@ def refine_text_with_openai(text):
     """
     # Make a call to the OpenAI API for text refinement
     response = client.chat.completions.create(
-        model="gpt-4",
+        model="gpt-4o",
         messages=[
             {"role": "system", "content": "You are an expert editor with a focus on maintaining accuracy in transcriptions."},
             {"role": "user", "content": prompt}
         ],
-        temperature=0.4,
+        temperature=0.3,
     )
 
     # Extract the content and edits from the assistant's message
