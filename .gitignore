@@ -1,6 +1,12 @@
 # Created by https://www.toptal.com/developers/gitignore/api/python
 # Edit at https://www.toptal.com/developers/gitignore?templates=python
 
+# project specific
+slices/
+extracts/
+digests/
+revised/
+
 ### Python ###
 # Byte-compiled / optimized / DLL files
 __pycache__/
@@ -115,6 +121,7 @@ ipython_config.py
 
 # PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm
 __pypackages__/
+
 
 # Celery stuff
 celerybeat-schedule
