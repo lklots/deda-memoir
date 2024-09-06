@@ -128,8 +128,10 @@ The project consists of several shell scripts that should be run in order. Here'
    - Outputs: Final transcribed and reviewed memoir file in the output directory.
    - Usage: `./05_review.sh`
 
-
-
+6. **06_draft.sh**:
+   - Description: Compiles all revised text files into a single draft document.
+   - Outputs: A draft text file in the `drafts/` directory with page markers.
+   - Usage: `./06_draft.sh`
 
 
 
