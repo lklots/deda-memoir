@@ -118,12 +118,16 @@ The project consists of several shell scripts that should be run in order. Here'
    - Outputs: Processed text files in the `digests/` directory.
    - Usage: `./03_digest.sh`
 
-4. **04_review.sh**:
-   - Description: Uses OpenAI to review and refine the text, producing the final Russian output.
-   - Outputs: Final transcribed and reviewed memoir file in the output directory.
-   - Usage: `./04_review.sh`
+4. **04_revise.sh**:
+   - Description: Uses OpenAI to refine the text, producing a more polished output.
+   - Outputs: Refined text files in the `revised/` directory.
+   - Usage: `./04_revise.sh`
 
-To run the entire workflow, execute the scripts in order:
+5. **05_review.sh**:
+   - Description: populates a google doc with all the information necessary to make a manual review.
+   - Outputs: Final transcribed and reviewed memoir file in the output directory.
+   - Usage: `./05_review.sh`
+
 
 
 
