@@ -10,11 +10,8 @@ from docx.oxml import OxmlElement
 
 def append_review_to_docx(docx_file, image_path, digest, revision_text, revision_edits, metadata):
     """Add a table with an image on the left and combined text on the right to the .docx file."""
-    doc = Document(docx_file) if os.path.exists(docx_file) else Document()
-    doc.add_page_break()
-
-    # Add a table with 2 rows and 3 columns
-    table = doc.add_table(rows=2, cols=3)
+    doc = Document(docx_file) if os.path.exists(docx_file) else Document()    # Add a table with 1 row and 3 columns
+    table = doc.add_table(rows=1, cols=3)
 
     # Set the table to take the whole page width
     table_width = doc.sections[0].page_width - doc.sections[0].left_margin - doc.sections[0].right_margin
@@ -25,10 +22,12 @@ def append_review_to_docx(docx_file, image_path, digest, revision_text, revision
     for cell in table.columns[2].cells:
         cell.width = table_width / 3
 
-    # First row, first cell: Add the image
+    # First row, first cell: Add the image and metadata + revision edits
     cell1 = table.cell(0, 0)
     run = cell1.paragraphs[0].add_run()
     run.add_picture(image_path, width=Inches(1.5))  # Adjust image size
+    cell1.add_paragraph(metadata)
+    cell1.add_paragraph(revision_edits)
 
     # First row, second cell: Add the digest text
     cell2 = table.cell(0, 1)
@@ -38,16 +37,6 @@ def append_review_to_docx(docx_file, image_path, digest, revision_text, revision
     cell3 = table.cell(0, 2)
     cell3.text = revision_text
 
-    # Second row, first cell: Add metadata
-    cell4 = table.cell(1, 0)
-    cell4.text = metadata
-
-    # Second row, second and third cells: Merge and add revision edits
-    cell5 = table.cell(1, 1)
-    cell6 = table.cell(1, 2)
-    cell5.merge(cell6)
-    cell5.text = revision_edits
-
     # Set font size for digest and revision text to 8 (smaller)
     for cell in [table.cell(0, 1), table.cell(0, 2)]:
         for paragraph in cell.paragraphs:
@@ -55,12 +44,11 @@ def append_review_to_docx(docx_file, image_path, digest, revision_text, revision
                 run.font.size = Pt(8)  # Smaller font size
 
     # Set font size for metadata to 6
-    for paragraph in table.cell(1, 0).paragraphs:
+    for paragraph in cell1.paragraphs[1:]:
         for run in paragraph.runs:
             run.font.size = Pt(6)
 
     doc.save(docx_file)
-
 def digest_to_text(word_objects):
     """
     Converts the processed word objects into a single piece of text.
