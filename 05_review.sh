@@ -4,7 +4,7 @@
 REVISED_DIR="revised"
 SLICES_DIR="slices"
 DIGESTS_DIR="digests"
-DOCX_FILE="deda_memoir_review.docx"
+DOCX_FILE="review.docx"
 
 # Check if the revised directory exists
 if [ ! -d "$REVISED_DIR" ]; then
