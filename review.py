@@ -1,101 +1,70 @@
 import os
 import json
 import argparse
-from google.oauth2 import service_account
-from googleapiclient.discovery import build
-from googleapiclient.http import MediaFileUpload
+from docx import Document
+from docx.shared import Inches, Pt
+from dotenv import load_dotenv
+from datetime import datetime
+from docx.oxml.ns import nsdecls
+from docx.oxml import OxmlElement
 
-# Define the required scopes
-SCOPES = ['https://www.googleapis.com/auth/documents', 'https://www.googleapis.com/auth/drive.file']
+def append_review_to_docx(docx_file, image_path, digest, revision_text, revision_edits, metadata):
+    """Add a table with an image on the left and combined text on the right to the .docx file."""
+    doc = Document(docx_file) if os.path.exists(docx_file) else Document()
+    doc.add_page_break()
 
-def authenticate_google():
-    """Authenticate the user with Google APIs using service account credentials."""
-    creds = service_account.Credentials.from_service_account_file(
-        os.getenv('GOOGLE_APPLICATION_CREDENTIALS'), scopes=SCOPES)
-    return build('docs', 'v1', credentials=creds), build('drive', 'v3', credentials=creds)
+    # Add a table with 2 rows and 3 columns
+    table = doc.add_table(rows=2, cols=3)
 
-def upload_image_to_drive(image_path):
-    """Upload an image to Google Drive and return its file ID."""
-    _, drive_service = authenticate_google()
-    file_metadata = {'name': os.path.basename(image_path)}
-    media = MediaFileUpload(image_path, mimetype='image/png')
-    file = drive_service.files().create(body=file_metadata, media_body=media, fields='id').execute()
-    drive_service.permissions().create(
-        fileId=file.get('id'),
-        body={'type': 'anyone', 'role': 'reader'},
-    ).execute()
+    # Set the table to take the whole page width
+    table_width = doc.sections[0].page_width - doc.sections[0].left_margin - doc.sections[0].right_margin
+    for cell in table.columns[0].cells:
+        cell.width = table_width / 3
+    for cell in table.columns[1].cells:
+        cell.width = table_width / 3
+    for cell in table.columns[2].cells:
+        cell.width = table_width / 3
 
-    return file.get('id')
+    # First row, first cell: Add the image
+    cell1 = table.cell(0, 0)
+    run = cell1.paragraphs[0].add_run()
+    run.add_picture(image_path, width=Inches(1.5))  # Adjust image size
 
-def add_image_and_text_to_doc(doc_id, image_id, text):
-    """Add a table with an image on the left and combined text on the right to the Google Doc."""
-    doc_service, _ = authenticate_google()
+    # First row, second cell: Add the digest text
+    cell2 = table.cell(0, 1)
+    cell2.text = digest
 
-    requests = [
-        # Insert a table with 1 row and 2 columns at the start of the document
-        {
-            'insertTable': {
-                'rows': 1,
-                'columns': 2,
-                'location': {
-                    'index': 1,
-                }
-            }
-        },
+    # First row, third cell: Add the revision text
+    cell3 = table.cell(0, 2)
+    cell3.text = revision_text
 
-        # insert image.
-        {
-            'insertInlineImage': {
-                'uri': f'https://drive.google.com/uc?id={image_id}',
-                'location': {
-                    'index': 5,
-                },
-                'objectSize': {
-                    'height': {
-                        'magnitude': 350,
-                        'unit': 'PT'
-                    },
-                    'width': {
-                        'magnitude': 350,
-                        'unit': 'PT'
-                    }
-                }
-            }
-        },
+    # Second row, first cell: Add metadata
+    cell4 = table.cell(1, 0)
+    cell4.text = metadata
 
-        # Insert text into the first cell of the table
-        {
-            'insertText': {
-                'location': {
-                    'index': 8,
-                },
-                'text': text
-            }
-        },
-    ]
+    # Second row, second and third cells: Merge and add revision edits
+    cell5 = table.cell(1, 1)
+    cell6 = table.cell(1, 2)
+    cell5.merge(cell6)
+    cell5.text = revision_edits
 
-    # Execute the batch update
-    doc_service.documents().batchUpdate(documentId=doc_id, body={'requests': requests}).execute()
+    # Set font size for digest and revision text to 8 (smaller)
+    for cell in [table.cell(0, 1), table.cell(0, 2)]:
+        for paragraph in cell.paragraphs:
+            for run in paragraph.runs:
+                run.font.size = Pt(8)  # Smaller font size
 
-def get_color_for_confidence(confidence):
-    """Determine the text color based on the confidence level."""
-    if confidence >= 0.95:
-        return {'red': 0.0, 'green': 0.4, 'blue': 0.0}  # Dark Green
-    elif confidence >= 0.85:
-        return {'red': 1.0, 'green': 0.6, 'blue': 0.2}  # Orange
-    else:
-        return {'red': 0.7, 'green': 0.0, 'blue': 0.0}  # Dark Red
+    # Set font size for metadata to 6
+    for paragraph in table.cell(1, 0).paragraphs:
+        for run in paragraph.runs:
+            run.font.size = Pt(6)
+
+    doc.save(docx_file)
 
 def digest_to_text(word_objects):
     """
     Converts the processed word objects into a single piece of text.
     Line breaks should be represented as newlines, and words should be separated by spaces.
-
-    Args:
-        word_objects: List of word objects with 'word', 'confidence', and 'detected_break'.
-
-    Returns:
-        A single string with proper spaces and line breaks.
     """
     text_lines = []
     current_line = []
@@ -119,31 +88,25 @@ def digest_to_text(word_objects):
     # Join all the lines with newlines and return the final text
     return '\n'.join(text_lines)
 
+def load_revision(revision_path):
+    with open(revision_path, 'r', encoding='utf-8') as f:
+        revision_data = json.load(f)
+    return revision_data['text'], revision_data['edits']
+
 def main():
-    parser = argparse.ArgumentParser(description="Populate a Google Doc with digests and images for manual review.")
-    parser.add_argument('doc_id', help='ID of google doc to populate')
+    parser = argparse.ArgumentParser(description="Populate a .docx with digests, revisions, and images for manual review.")
+    parser.add_argument('docx_file', help='Path to the .docx file to populate or create')
     parser.add_argument('image_file', help='Path to the image file')
     parser.add_argument('digest_file', help='Path to the digest JSON file')
-
+    parser.add_argument('revision_file', help='Path to the revision JSON file')
     args = parser.parse_args()
 
-    # Load environment variables
-    GOOGLE_APPLICATION_CREDENTIALS = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    load_dotenv()
 
-    # Check if the Google Application Credentials are set
-    if not GOOGLE_APPLICATION_CREDENTIALS:
-        raise EnvironmentError("The GOOGLE_APPLICATION_CREDENTIALS environment variable is not set.")
-
-    doc_id = args.doc_id
+    docx_file = args.docx_file
     image_path = args.image_file
     digest_path = args.digest_file
-
-    # Verify that doc_id points to a valid document
-    try:
-        doc_service, _ = authenticate_google()
-        doc_service.documents().get(documentId=doc_id).execute()
-    except Exception as e:
-        raise ValueError(f"The provided doc_id '{doc_id}' is not valid or accessible. Error: {e}")
+    revision_path = args.revision_file
 
     # Check if both digest and image files exist
     if not os.path.exists(digest_path) or not os.path.exists(image_path):
@@ -154,12 +117,11 @@ def main():
     with open(digest_path, 'r', encoding='utf-8') as f:
         digest_data = json.load(f)
 
-    # Upload image to Google Drive
-    image_id = upload_image_to_drive(image_path)
-
-    # Add the image and all text entries to the Google Doc as a single page
+    # Add the image and all text entries to the .docx file as a single page
     digest_text = digest_to_text(digest_data)
-    add_image_and_text_to_doc(doc_id, image_id, digest_text)
+    revision_text, revision_edits = load_revision(revision_path)
+    metadata = f"Image: {os.path.basename(image_path)}\nDigest: {os.path.basename(digest_path)}\nRevision: {os.path.basename(revision_path)}\nTime: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+    append_review_to_docx(docx_file, image_path, digest_text, revision_text, revision_edits, metadata)
 
     print(f'Processed digest {digest_path} with image {image_path}')
 
