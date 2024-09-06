@@ -31,8 +31,7 @@ export INPUT_DIR OUTPUT_DIR
 # Function to process a single JSON file
 process_file() {
     input_file=$1
-    file_number=$(basename "$input_file" .json | sed 's/page_//')
-    output_file="$OUTPUT_DIR/page_digest_${file_number}.json"
+    output_file="$OUTPUT_DIR/$(basename "$input_file")"
     python3 digest.py "$input_file" > "$output_file"
     if [ $? -ne 0 ]; then
         echo "Error: Failed to process '$input_file' with digest.py."

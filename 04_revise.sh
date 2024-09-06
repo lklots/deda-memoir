@@ -25,16 +25,26 @@ for file in "$INPUT_DIR"/*.json; do
 
     # Get the base filename
     filename=$(basename "$file")
+    # Define the output file path
+    output_file="$OUTPUT_DIR/$filename"
 
-    # Replace _digest with _revised in the filename
-    revised_filename="${filename/_digest/_revised}"
+    # Check if the revised file already exists
+    if [ -f "$output_file" ]; then
+        echo "$output_file already exists. Skipping..."
+        continue
+    fi
+    # Process the file and capture the output in a temporary file
+    temp_output=$(mktemp)
+    if python revise.py "$file" > "$temp_output"; then
+        # If successful, move the temporary file to the final output location
+        mv "$temp_output" "$output_file"
+        echo "Created $output_file"
+    else
+        echo "Error: Failed to process $file with revise.py."
+        rm -f "$temp_output" # Clean up the temporary file
+        continue
+    fi
 
-    echo "Processing $filename..."
-
-    # Run the Python script and redirect output to the new file
-    python revise.py "$file" > "revised/$revised_filename"
-
-    echo "Created revised/$revised_filename"
 done
 
 echo "Revision process complete."
