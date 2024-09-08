@@ -7,6 +7,7 @@
 \usepackage{graphicx}
 \usepackage{hyperref}
 \usepackage{ifthen}
+\usepackage{paracol}
 \usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}  % Reduce margins
 
 % ClassicThesis options
@@ -17,8 +18,13 @@
 \date{}
 
 \begin{document}
-% Define a global flag, default is "both"
-\newcommand{\languageflag}{both}
+
+% Define a custom command to insert image and switch columns
+\newcommand{\pageimage}[1]{%
+    \switchcolumn[0] % Switch to the first column (left)
+    \includegraphics[width=\linewidth]{../slices/#1.png}
+    \switchcolumn     % Switch to the second column (right)
+}
 
 % Define the translation command for chapter titles
 \newcommand{\translatechapter}[2]{
@@ -73,13 +79,17 @@
 \frontmatter
 \maketitle
 \tableofcontents
-
 \mainmatter
-\translatechapter{Введение}{Introduction}
-\input{chapter1.tex}
 
+\translatechapter{Введение}{Introduction}
+\begin{paracol}{2}
+\input{chapter1.tex}
+\end{paracol}
 \translatechapter{Метры пехоты}{Meters of Infantry}
+\begin{paracol}{2}
 \input{chapter2.tex}
+\end{paracol}
+
 
 \backmatter
 \chapter{Bibliography}
