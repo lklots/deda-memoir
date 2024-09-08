@@ -1,0 +1,88 @@
+\documentclass[11pt,a4paper,oneside]{scrbook}  % classicthesis is designed for scrbook
+
+\usepackage{classicthesis}
+\usepackage[T2A]{fontenc}    % Use T2A encoding for Cyrillic
+\usepackage[utf8]{inputenc}  % UTF-8 encoding for input
+\usepackage[russian,english]{babel}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{ifthen}
+\usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}  % Reduce margins
+
+% ClassicThesis options
+\usepackage[]{classicthesis}
+
+\title{Deda Memoir}
+\author{Fima Klots}
+\date{}
+
+\begin{document}
+% Define a global flag, default is "both"
+\newcommand{\languageflag}{both}
+
+% Define the translation command for chapter titles
+\newcommand{\translatechapter}[2]{
+    \ifthenelse{\equal{\languageflag}{russian}}{
+        \chapter{#1}
+    }{
+    \ifthenelse{\equal{\languageflag}{english}}{
+        \chapter{#2}
+    }{
+        \chapter{#2 \hfill #1}
+    }
+    }
+}
+
+% Define the translation command that uses the global flag
+\newcommand{\translate}[2]{
+    \ifthenelse{\equal{\languageflag}{english}}{
+        \begin{otherlanguage*}{english}
+            #2
+        \end{otherlanguage*}
+    }{
+    \ifthenelse{\equal{\languageflag}{russian}}{
+        \begin{otherlanguage*}{russian}
+            #1
+        \end{otherlanguage*}
+    }{
+        \begin{minipage}[t]{0.45\linewidth}
+            \begin{otherlanguage*}{english}
+                #2
+            \end{otherlanguage*}
+        \end{minipage}%
+        \hfill
+        \begin{minipage}[t]{0.45\linewidth}
+            \begin{otherlanguage*}{russian}
+                #1
+            \end{otherlanguage*}
+        \end{minipage}
+    }
+    }
+}
+
+\begin{titlepage}
+  \vspace*{\fill}
+  \begin{center}
+      \translate
+        {Моим детям, внукам, родственникам О нашей семье, близких нам людях и временах, формировавших их судьбы.}
+        {To my children, grandchildren, and relatives about our family, the people close to us, and the times that shaped their destinies.}
+  \end{center}
+  \vspace*{\fill}
+\end{titlepage}
+
+\frontmatter
+\maketitle
+\tableofcontents
+
+\mainmatter
+\translatechapter{Введение}{Introduction}
+\input{chapter1.tex}
+
+\translatechapter{Метры пехоты}{Meters of Infantry}
+\input{chapter2.tex}
+
+\backmatter
+\chapter{Bibliography}
+% Your bibliography or references here
+
+\end{document}
