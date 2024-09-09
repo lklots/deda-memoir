@@ -1,70 +1,22 @@
-\documentclass[11pt,a4paper,oneside]{scrbook}  % classicthesis is designed for scrbook
+\documentclass[11pt,a4paper,oneside]{book}
 
-\usepackage{classicthesis}
 \usepackage[T2A]{fontenc}    % Use T2A encoding for Cyrillic
-\usepackage[utf8]{inputenc}  % UTF-8 encoding for input
 \usepackage[russian,english]{babel}
+\usepackage[utf8]{inputenc}  % UTF-8 encoding for input
 \usepackage{graphicx}
-\usepackage{hyperref}
+\usepackage[hypertexnames=false]{hyperref} % lots of name conflicts otherwise
 \usepackage{ifthen}
 \usepackage{paracol}
-\usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}  % Reduce margins
+% palatino font does not work with cyrillic
+\usepackage[palatino=false]{classicthesis}
+\usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}
 
-% ClassicThesis options
-\usepackage[]{classicthesis}
-
+\usepackage{commands} % custom commands for this project
+\def\languageflag{english}
+\begin{document}
 \title{Deda Memoir}
 \author{Fima Klots}
 \date{}
-
-\begin{document}
-
-% Define a custom command to insert image and switch columns
-\newcommand{\pageimage}[1]{%
-    \switchcolumn[0] % Switch to the first column (left)
-    \includegraphics[width=\linewidth]{../slices/#1.png}
-    \switchcolumn     % Switch to the second column (right)
-}
-
-% Define the translation command for chapter titles
-\newcommand{\translatechapter}[2]{
-    \ifthenelse{\equal{\languageflag}{russian}}{
-        \chapter{#1}
-    }{
-    \ifthenelse{\equal{\languageflag}{english}}{
-        \chapter{#2}
-    }{
-        \chapter{#2 \hfill #1}
-    }
-    }
-}
-
-% Define the translation command that uses the global flag
-\newcommand{\translate}[2]{
-    \ifthenelse{\equal{\languageflag}{english}}{
-        \begin{otherlanguage*}{english}
-            #2
-        \end{otherlanguage*}
-    }{
-    \ifthenelse{\equal{\languageflag}{russian}}{
-        \begin{otherlanguage*}{russian}
-            #1
-        \end{otherlanguage*}
-    }{
-        \begin{minipage}[t]{0.45\linewidth}
-            \begin{otherlanguage*}{english}
-                #2
-            \end{otherlanguage*}
-        \end{minipage}%
-        \hfill
-        \begin{minipage}[t]{0.45\linewidth}
-            \begin{otherlanguage*}{russian}
-                #1
-            \end{otherlanguage*}
-        \end{minipage}
-    }
-    }
-}
 
 \begin{titlepage}
   \vspace*{\fill}
@@ -76,23 +28,13 @@
   \vspace*{\fill}
 \end{titlepage}
 
-\frontmatter
-\maketitle
-\tableofcontents
-\mainmatter
-
 \translatechapter{Введение}{Introduction}
 \begin{paracol}{2}
 \input{chapter1.tex}
 \end{paracol}
+
 \translatechapter{Метры пехоты}{Meters of Infantry}
 \begin{paracol}{2}
 \input{chapter2.tex}
 \end{paracol}
-
-
-\backmatter
-\chapter{Bibliography}
-% Your bibliography or references here
-
 \end{document}

@@ -14,6 +14,8 @@ my $output_name = "memoir_$languageflag";
 # pdflatex command with the language flag and output file name
 $pdflatex = "pdflatex -synctex=1 -output-directory=$out_dir -jobname=$output_name \"\\newcommand{\\languageflag}{$languageflag}\\input{%S}\"";
 
+$log_file = "$output_name.log";
+
 # Define a subroutine to force rebuild
 sub force_rebuild {
     open my $fh, '>', "$out_dir/.languageflag";
