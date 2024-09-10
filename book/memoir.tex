@@ -7,9 +7,11 @@
 \usepackage[hypertexnames=false]{hyperref} % lots of name conflicts otherwise
 \usepackage{ifthen}
 \usepackage{paracol}
+\usepackage{placeins}
 % palatino font does not work with cyrillic
 \usepackage[palatino=false]{classicthesis}
 \usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}
+
 
 \usepackage{commands} % custom commands for this project
 \def\languageflag{english}
@@ -30,11 +32,9 @@
 
 \translatechapter{Введение}{Introduction}
 \begin{paracol}{2}
-\input{chapter1.tex}
+\input{book/draft}
 \end{paracol}
 
 \translatechapter{Метры пехоты}{Meters of Infantry}
-\begin{paracol}{2}
-\input{chapter2.tex}
-\end{paracol}
+
 \end{document}
