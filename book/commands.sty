@@ -1,0 +1,28 @@
+% Define a custom command to insert image and switch columns
+\newcommand{\pageimage}[1]{%
+    \switchcolumn[0] % Switch to the first column (left)
+    \includegraphics[width=\linewidth]{../slices/#1.png}
+    \switchcolumn     % Switch to the second column (right)
+}
+
+% Define the translation command for chapter titles
+\newcommand{\translatechapter}[2]{
+    \ifthenelse{\equal{\languageflag}{russian}}{
+        \chapter{#1}
+    }{
+        \chapter{#2}
+    }
+}
+
+% Define the translation command that uses the global flag
+\newcommand{\translate}[2]{
+    \ifthenelse{\equal{\languageflag}{english}}{
+        \begin{otherlanguage*}{english}
+            #2
+        \end{otherlanguage*}
+    }{
+        \begin{otherlanguage*}{russian}
+            #1
+        \end{otherlanguage*}
+    }
+}
