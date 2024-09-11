@@ -12,8 +12,15 @@
 \usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}
 
 \usepackage{commands} % custom commands for this project
-\def\languageflag{both}
+\def\languageflag{russian}
+
 \begin{document}
+\ifthenelse{\equal{\languageflag}{russian}}{
+    \selectlanguage{russian}
+}{
+    \selectlanguage{english}
+}
+
 \title{Deda Memoir}
 \author{Fima Klots}
 \date{}
