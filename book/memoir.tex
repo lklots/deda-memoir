@@ -12,7 +12,7 @@
 \usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}
 
 \usepackage{commands} % custom commands for this project
-\def\languageflag{russian}
+\def\languageflag{both}
 
 \begin{document}
 \ifthenelse{\equal{\languageflag}{russian}}{
@@ -41,8 +41,8 @@
 \input{chapter1.tex}
 \end{paracol}
 
-\translatechapter{Метры пехоты}{Meters of Infantry}
-\begin{paracol}{2}
-\input{draft.tex}
-\end{paracol}
+\input{chapter2.tex}
+\input{chapter3.tex}
+\input{chapter4.tex}
+
 \end{document}
