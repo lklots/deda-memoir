@@ -1,39 +1,36 @@
 % Define a custom command to insert image and switch columns
 \newcommand{\pageimage}[1]{%
     \ifthenelse{\equal{\languageflag}{both}}{}{
-        \switchcolumn[0] % Switch to the first column (left)
+        \switchcolumn[0]* % Switch to the first column (left)
+        \hypertarget{img:#1}{} % Define the hyperlink target
         \includegraphics[width=\linewidth]{../slices/#1.png}
-        \switchcolumn[1]     % Switch to the second column (right)
+        \switchcolumn[1] % Switch to the second column (right)
+        \hyperlink{img:#1}{See \texttt{\detokenize{#1}}} % Create hyperlink pointing to the target
     }
 }
 
-% Define the translation command for chapter titles
-\newcommand{\translatechapter}[2]{
+\newcommand{\includelanguagefile}[3]{%
     \ifthenelse{\equal{\languageflag}{russian}}{
-        \chapter{#1}
+        \chapter{#2}
     }{
-        \ifthenelse{\equal{\languageflag}{english}}{
-            \chapter{#2}
-        }{
-            \chapter{#2}
-        }
+        \chapter{#3}
     }
-}
-
-% Define the translation command that uses the global flag
-\newcommand{\translate}[2]{
-    \ifthenelse{\equal{\languageflag}{english}}{
-            #2
-    }{
+    \begin{paracol}{2}
         \ifthenelse{\equal{\languageflag}{russian}}{
-                #1
+            \switchcolumn[1]
+            \input{#1_ru.tex}
         }{
-            \switchcolumn[0] % Switch to the first column (left)
-            \selectlanguage{russian}
-                #1
-            \switchcolumn[1] % Switch to the second column (right)
-            \selectlanguage{english}
-                #2
+            \ifthenelse{\equal{\languageflag}{both}}{
+                \selectlanguage{russian}
+                \switchcolumn[0]
+                \input{#1_ru.tex}
+                \selectlanguage{english}
+                \switchcolumn[1]
+                \input{#1_en.tex}
+            }{
+                \switchcolumn[1]
+                \input{#1_en.tex}
+            }
         }
-    }
+    \end{paracol}
 }

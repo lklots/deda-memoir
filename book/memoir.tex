@@ -10,9 +10,10 @@
 % palatino font does not work with cyrillic
 \usepackage[palatino=false]{classicthesis}
 \usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}
-
 \usepackage{commands} % custom commands for this project
-\def\languageflag{english}
+
+% The value of the flag can be 'english', 'russian', or 'both'
+\def\languageflag{russian}
 
 \begin{document}
 \ifthenelse{\equal{\languageflag}{russian}}{
@@ -25,7 +26,6 @@
 \author{Fima Klots}
 \date{}
 
-
 \begin{titlepage}
   \vspace*{\fill}
   \begin{center}
@@ -36,13 +36,11 @@
   \vspace*{\fill}
 \end{titlepage}
 
-\translatechapter{Введение}{Introduction}
-\begin{paracol}{2}
-\input{chapter1.tex}
-\end{paracol}
-
-\input{chapter2.tex}
-\input{chapter3.tex}
-\input{chapter4.tex}
+\includelanguagefile{chapter1}{Введение}{Introduction}
+\includelanguagefile{chapter2}{Фронтовые воспоминания}{Frontline Memories}
+\includelanguagefile{chapter3}{}{}
+%\input{chapter2.tex}
+%\input{chapter3.tex}
+%\input{chapter4.tex}
 
 \end{document}
