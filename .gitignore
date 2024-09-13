@@ -185,3 +185,5 @@ pyrightconfig.json
 .DS_Store
 
 # End of https://www.toptal.com/developers/gitignore/api/python
+book/memoir.pdf
+book/memoir.synctex.gz
