@@ -12,10 +12,16 @@
 \usepackage[left=3cm, right=3cm, top=2cm, bottom=2cm]{geometry}
 \usepackage{commands} % custom commands for this project
 
+% paracol and footmisc that is used by classicthesis do not work well together
+% so do this HACK: https://tex.stackexchange.com/questions/541686/how-to-remove-footnote-indentation-without-footmisc/541699#541699
+\usepackage{scrextend}
+\deffootnote{0.5em}{0em}{\textsuperscript{\thefootnotemark}\,}
+
 % The value of the flag can be 'english', 'russian', or 'both'
 \def\languageflag{russian}
 
 \begin{document}
+
 \ifthenelse{\equal{\languageflag}{russian}}{
     \selectlanguage{russian}
 }{
